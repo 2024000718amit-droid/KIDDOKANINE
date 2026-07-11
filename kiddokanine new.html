@@ -11,13 +11,15 @@
 <link rel="icon" type="image/png" sizes="192x192" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23b5401a' width='192' height='192'/><text x='50%' y='50%' font-size='120' fill='white' text-anchor='middle' dominant-baseline='middle' font-family='Arial'>🦷</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23b5401a' width='180' height='180' rx='40'/><text x='50%' y='50%' font-size='100' fill='white' text-anchor='middle' dominant-baseline='middle' font-family='Arial'>🦷</text></svg>">
 <title>KIDDOKANINE — Pediatric Dentistry Clinical Assistant</title>
-<!-- Local Fonts -->
-<link rel="stylesheet" href="./assets/fonts/fonts.css">
-<!-- Local Font Awesome -->
-<link rel="stylesheet" href="./assets/fontawesome/css/all.min.css">
-<!-- Local JavaScript Libraries -->
-<script src="./assets/libs/html2pdf.bundle.min.js"></script>
-<script src="./assets/libs/html2canvas.min.js"></script>
+<!-- Web Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkR4j8z46p6G7f2dKc4xwQ4h0M5B4mA9E6+g==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<!-- JavaScript Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPGdhPK4P4fQfT1jP50R8I5i5fP0pQfA1f7fA0zY4xXHzkwmo7aX6ixkmKuuNHYsYkP82LPgAvFp8Z64Kaw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNa5M6kRykWGBqBPdZiZsaAJ+lZeXqIuAvV38DSHLVQQP4Jrped1IovnHgwlHGhEq+y3OC+/oTr4a9L5xRngkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 :root {
   --bg: #f5f2ec;
@@ -7008,14 +7010,31 @@ async function runCompatibilityChecks() {
   const report = (name, ok, detail) => checks.push({ name, ok, detail });
 
   try {
+    const form = document.getElementById('intakeForm');
+    const fieldSnapshot = [];
+    if (form) {
+      form.querySelectorAll('input, select, textarea').forEach((el) => {
+        fieldSnapshot.push({
+          el,
+          value: el.value,
+          checked: typeof el.checked === 'boolean' ? el.checked : undefined
+        });
+      });
+    }
+
     const hasShareFns = typeof PedoPlanExport?.generateShareLink === 'function'
       && typeof PedoPlanExport?.loadFromSharedLink === 'function';
     if (!hasShareFns) throw new Error('share-link methods missing');
     const share = PedoPlanExport.generateShareLink();
     const hash = typeof share?.url === 'string' && share.url.includes('#') ? share.url.slice(share.url.indexOf('#')) : '';
     if (!hash || !hash.includes('shared=')) throw new Error('share-link generation returned invalid URL');
-    PedoPlanExport.loadFromSharedLink(hash);
-    report('shared-link load/generate', true, 'Methods callable');
+    const restored = PedoPlanExport.loadFromSharedLink(hash);
+    if (restored === null) throw new Error('shared-link load returned null');
+    fieldSnapshot.forEach((state) => {
+      state.el.value = state.value;
+      if (state.checked !== undefined) state.el.checked = state.checked;
+    });
+    report('shared-link load/generate', true, 'Round-trip callable with form state restored');
   } catch (err) {
     report('shared-link load/generate', false, err.message);
   }
@@ -7025,6 +7044,7 @@ async function runCompatibilityChecks() {
       throw new Error('save/delete methods missing');
     }
     if (PedoPlanDB.isDesktopMode || !PedoPlanDB.configured) {
+      let tempId = null;
       const temp = await PedoPlanDB.savePatient({
         name: '__compat_check__',
         age_group: 'preschool',
@@ -7032,11 +7052,17 @@ async function runCompatibilityChecks() {
         behavior: 'negative'
       });
       if (temp?.id !== undefined && temp?.id !== null) {
-        await PedoPlanDB.deletePatient(temp.id);
+        tempId = temp.id;
+      }
+      if (tempId === null) throw new Error('compat check save did not return an id');
+      await PedoPlanDB.deletePatient(tempId);
+      const leftovers = PedoPlanDB._loadPatientsLocal().filter(p => p.id === tempId);
+      if (leftovers.length) {
+        throw new Error('compat check cleanup failed');
       }
       report('patient save/delete', true, 'Local save/delete round-trip ok');
     } else {
-      report('patient save/delete', true, 'Method availability validated (remote mode)');
+      report('patient save/delete', true, 'Skipped destructive round-trip in configured remote mode');
     }
   } catch (err) {
     report('patient save/delete', false, err.message);
@@ -7057,7 +7083,7 @@ async function runCompatibilityChecks() {
   const failed = checks.filter(c => !c.ok);
   if (failed.length) {
     console.error('Compatibility check failed:', checks);
-    toast('Compatibility check failed for one or more storage/share features. See console for details.');
+    console.warn('Compatibility checks are non-blocking. See details above.');
   } else {
     console.info('Compatibility check passed:', checks);
   }
