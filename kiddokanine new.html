@@ -4253,7 +4253,7 @@ async function generatePlan(e) {
     generateBtn.style.cursor = 'pointer';
     btnText.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> ' + originalText;
     
-    // AUTO-SAVE patient inputs to Supabase (non-blocking)
+    // AUTO-SAVE patient inputs to Supabase/local storage (non-blocking UI, surfaced failures)
     PedoPlanDB.savePatient({
       name        : patientName,
       age_group   : ageGroup,
@@ -4262,7 +4262,10 @@ async function generatePlan(e) {
       parent_profile : parentProfile,
       visit_history  : visitHistory,
       flags       : flags.join(',')
-    }).catch(e => console.warn('Patient save skipped:', e));
+    }).catch(e => {
+      console.error('Patient save failed:', e);
+      toast(`Plan generated, but patient record was not saved: ${e?.message || 'Storage unavailable.'}`);
+    });
 
     // Scroll to output on mobile
     document.getElementById('outputState').scrollIntoView({ behavior: 'smooth' });
@@ -6218,6 +6221,16 @@ const PedoPlanAnalytics = {
     }
   },
 
+  resetData: function() {
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+      return true;
+    } catch (err) {
+      console.error('Analytics reset failed:', err);
+      throw new Error('Could not reset analytics data because browser storage is unavailable.');
+    }
+  },
+
   // ── Track a generic event ─────────────────────────────────────
   event: function(type, meta = {}) {
     const data = this.load();
@@ -6352,7 +6365,7 @@ const PedoPlanAnalytics = {
 
       <!-- Actions -->
       <div style="display:flex;gap:8px;">
-        <button onclick="if(confirm('Reset all analytics data?')){try{localStorage.removeItem('pp_analytics_v1');}catch(e){console.error('Reset failed:',e);} document.getElementById('ppAdminPanel').remove();PedoPlanAnalytics.showPanel();}" style="
+        <button onclick="if(confirm('Reset all analytics data?')){try{PedoPlanAnalytics.resetData();}catch(e){toast(e.message||'Reset failed');} document.getElementById('ppAdminPanel').remove();PedoPlanAnalytics.showPanel();}" style="
           flex:1;padding:8px;border:1px solid var(--red-border);border-radius:7px;
           background:var(--red-bg);color:var(--red);font-size:11px;font-weight:600;
           cursor:pointer;font-family:var(--sans);
@@ -6988,6 +7001,69 @@ const KiddokanineLicense = {
 };
 
 // ═══════════════════════════════════════════════════════════════
+// COMPATIBILITY CHECK — lightweight sanity checks after entry-point cleanup
+// ═══════════════════════════════════════════════════════════════
+async function runCompatibilityChecks() {
+  const checks = [];
+  const report = (name, ok, detail) => checks.push({ name, ok, detail });
+
+  try {
+    const hasShareFns = typeof PedoPlanExport?.generateShareLink === 'function'
+      && typeof PedoPlanExport?.loadFromSharedLink === 'function';
+    if (!hasShareFns) throw new Error('share-link methods missing');
+    const share = PedoPlanExport.generateShareLink();
+    const hash = typeof share?.url === 'string' && share.url.includes('#') ? share.url.slice(share.url.indexOf('#')) : '';
+    if (!hash || !hash.includes('shared=')) throw new Error('share-link generation returned invalid URL');
+    PedoPlanExport.loadFromSharedLink(hash);
+    report('shared-link load/generate', true, 'Methods callable');
+  } catch (err) {
+    report('shared-link load/generate', false, err.message);
+  }
+
+  try {
+    if (typeof PedoPlanDB?.savePatient !== 'function' || typeof PedoPlanDB?.deletePatient !== 'function') {
+      throw new Error('save/delete methods missing');
+    }
+    if (PedoPlanDB.isDesktopMode || !PedoPlanDB.configured) {
+      const temp = await PedoPlanDB.savePatient({
+        name: '__compat_check__',
+        age_group: 'preschool',
+        procedure: 'exam',
+        behavior: 'negative'
+      });
+      if (temp?.id !== undefined && temp?.id !== null) {
+        await PedoPlanDB.deletePatient(temp.id);
+      }
+      report('patient save/delete', true, 'Local save/delete round-trip ok');
+    } else {
+      report('patient save/delete', true, 'Method availability validated (remote mode)');
+    }
+  } catch (err) {
+    report('patient save/delete', false, err.message);
+  }
+
+  try {
+    if (typeof PedoPlanAnalytics?.resetData !== 'function') throw new Error('analytics reset method missing');
+    const backup = localStorage.getItem(PedoPlanAnalytics.STORAGE_KEY);
+    PedoPlanAnalytics.resetData();
+    if (backup !== null) {
+      localStorage.setItem(PedoPlanAnalytics.STORAGE_KEY, backup);
+    }
+    report('analytics reset', true, 'Reset path callable');
+  } catch (err) {
+    report('analytics reset', false, err.message);
+  }
+
+  const failed = checks.filter(c => !c.ok);
+  if (failed.length) {
+    console.error('Compatibility check failed:', checks);
+    toast('Compatibility check failed for one or more storage/share features. See console for details.');
+  } else {
+    console.info('Compatibility check passed:', checks);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // BOOT — initialise all modules
 // ═══════════════════════════════════════════════════════════════
 
@@ -7010,6 +7086,13 @@ const KiddokanineLicense = {
 
   // Patient DB: load badge count after DOM ready
   PedoPlanDB.init();
+
+  // Post-boot compatibility checks
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { runCompatibilityChecks(); }, { once: true });
+  } else {
+    runCompatibilityChecks();
+  }
 
   console.log(`%c${APP_CONFIG.appName} Security Module loaded — ${APP_CONFIG.version}`, 'color:#003087;font-weight:bold;');
 })();

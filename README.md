@@ -15,20 +15,13 @@ Once deployed via GitHub Pages (see below), this will be available at:
 
 ```
 .
-├── index.html              # App shell / markup
+├── kiddokanine new.html     # Canonical app entry point (single-file app)
+├── index.html               # Redirects to kiddokanine new.html
 ├── manifest.json            # PWA manifest
-├── icons/                   # App icons
-├── css/
-│   └── styles.css           # All app styling
-├── js/
-│   ├── install-prompt.js    # PWA install prompt handling
-│   ├── clinical-engine.js   # Core clinical data matrix + app logic
-│   ├── export.js            # PDF / JSON / image export & sharing
-│   └── security.js          # Branding, license gate, watermarking, analytics
 └── .github/workflows/       # CI/CD (GitHub Pages deploy)
 ```
 
-This app was originally a single ~7,000-line HTML file and has been split into standard, maintainable files with no build step required — it runs as a static site.
+The app currently runs as a static single-file application with no build step.
 
 ## Running locally
 
