@@ -1,0 +1,18 @@
+Copyright (c) 2026 KIDDOKANINE
+
+All rights reserved.
+
+This source code and its associated assets are proprietary. No part of this
+repository may be copied, modified, distributed, sublicensed, or used to
+create derivative works without prior written permission from the copyright
+holder, except as explicitly permitted by a separate written agreement
+(e.g., an invite/license granted through the app's own access-gate system).
+
+This repository includes a client-side licensing/invite-gate feature
+(see js/security.js) intended to control end-user access to the deployed
+app. This LICENSE file governs the source code itself.
+
+If you intended this project to be open source instead, replace this file
+with an OSI-approved license (e.g., MIT) that matches your intent — note
+that doing so would be inconsistent with the built-in "invite-only" and
+"anti-casual-copy" features, which you may want to remove first.

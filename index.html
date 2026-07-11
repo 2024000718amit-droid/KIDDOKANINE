@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#003087">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KIDDOKANINE">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" sizes="192x192" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.svg">
+<title>KIDDOKANINE — Pediatric Dentistry Clinical Assistant</title>
+<!-- Fonts (Google Fonts CDN) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<!-- Font Awesome (CDN) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<!-- JavaScript Libraries (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="stylesheet" href="css/styles.css">
+<script src="js/install-prompt.js"></script>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav class="no-print">
+  <div class="nav-brand" style="display:flex;align-items:center;gap:12px;">
+
+    <div style="display:flex;align-items:center;gap:7px;">
+      <div class="nav-icon"><i class="fa-solid fa-tooth"></i></div>
+      <span class="nav-title">KIDDOKANINE</span>
+      <span class="nav-badge">Clinical Tool</span>
+    </div>
+  </div>
+  <div class="nav-actions">
+    <button id="installBtn" class="nav-btn" onclick="installApp()" style="display:none;">
+      <i class="fa-solid fa-download"></i> Install App
+    </button>
+    <button class="nav-btn" id="ppPatientsBtn" onclick="PedoPlanDB.showHistory()" title="Patient History">
+      <i class="fas fa-users"></i> Patients
+    </button>
+    <button class="nav-btn" onclick="openModal('refModal')">
+      <i class="fa-solid fa-book-open"></i> Quick Reference
+    </button>
+    <button class="nav-btn" onclick="openModal('settingsModal')">
+      <i class="fa-solid fa-gears"></i> AI Engine
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-app-strip no-print">
+  <button class="mini-pill" type="button" onclick="scrollToSection('intakeSection')"><i class="fa-solid fa-pen-to-square"></i> Intake</button>
+  <button class="mini-pill" type="button" onclick="scrollToSection('planSection')"><i class="fa-solid fa-layer-group"></i> Plan</button>
+  <button class="mini-pill" type="button" onclick="openModal('refModal')"><i class="fa-solid fa-book-open"></i> Ref</button>
+  <button class="mini-pill" type="button" onclick="openModal('settingsModal')"><i class="fa-solid fa-sliders"></i> AI</button>
+</div>
+
+<div class="mobile-hint no-print">
+  <i class="fa-solid fa-mobile-screen-button" style="color:var(--accent);"></i>
+  <div><strong>Mobile app mode.</strong> Use the bottom dock for intake, plan, and quick references.</div>
+</div>
+
+<!-- MAIN -->
+<div class="app-wrapper">
+
+  <!-- LEFT: INTAKE -->
+  <div id="intakeSection" class="no-print" style="display:flex;flex-direction:column;gap:14px;">
+
+    <div class="card">
+      <div style="margin-bottom:16px;">
+        <div style="font-family:var(--serif);font-size:18px;margin-bottom:3px;">Patient Intake</div>
+        <div style="font-size:11px;color:var(--text3);">Grounded in Marwah (5th Ed.), Shobha Tandon & DCI curriculum. India-specific context.</div>
+      </div>
+
+      <form id="intakeForm" onsubmit="generatePlan(event)" style="display:flex;flex-direction:column;gap:12px;">
+
+        <!-- Branding header -->
+        <div style="background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:4px;display:flex;align-items:center;gap:10px;">
+          <svg width="36" height="36" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect x="25" y="25" width="150" height="150" rx="40" fill="#003087"/>
+            <path d="M100 50 Q110 55 115 70 Q118 85 118 100 Q118 120 105 135 Q98 142 90 145 Q80 140 72 132 Q60 115 60 95 Q60 78 70 68 Q78 62 88 58 Q94 56 100 50 Z" fill="white" stroke="white" stroke-width="4"/>
+            <path d="M80 85 Q90 80 100 85 Q110 90 108 88 Q100 95 90 93 Q82 91 80 85 Z" fill="#003087" opacity="0.3"/>
+          </svg>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;">KIDDOKANINE</div>
+            <div style="font-size:9px;color:var(--text3);">[Clinic Name Placeholder]</div>
+          </div>
+        </div>
+        <!-- Name + Weight -->
+        <div class="two-col">
+          <div class="field">
+            <label>Patient Name / ID</label>
+            <input type="text" id="patientName" required placeholder="e.g., Rahul" />
+          </div>
+          <div class="field">
+            <label>Weight (Kg) <span style="color:var(--text3); font-weight:normal;">— for Dosages</span></label>
+            <input type="number" id="patientWeight" placeholder="e.g., 18" min="1" max="60" step="0.1" oninput="updateDosagePreview()" />
+          </div>
+        </div>
+
+        <!-- SU Reg + Clinician -->
+        <div class="two-col">
+          <div class="field">
+            <label>SU OP Reg. No. <span style="color:var(--text3);font-weight:normal;">— optional</span></label>
+            <input type="text" id="patientReg" placeholder="e.g., SDS/PED/2425/0123" style="font-family:var(--mono);font-size:11px;" />
+          </div>
+          <div class="field">
+            <label>Clinician / PG Name</label>
+            <input type="text" id="clinicianName" placeholder="Dr. ..." />
+          </div>
+        </div>
+
+        <!-- DOSAGE PREVIEW -->
+        <div id="dosagePreviewCard" style="display:none;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r-sm);padding:12px 14px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+            <i class="fa-solid fa-pills"></i> Drug Dosages for <span id="previewWeightLabel" style="font-family:var(--mono);"></span>
+          </div>
+          <div id="dosagePreviewContent" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
+          <div style="font-size:9px;color:var(--green);margin-top:8px;opacity:.8;">Based on Dr. Meenakshi Kher's Pedo Reference. Verify before prescribing.</div>
+        </div>
+
+        <!-- Age + Procedure -->
+        <div class="two-col">
+          <div class="field">
+            <label>Age Group</label>
+            <select id="ageGroup" required onchange="updateProcedures()">
+              <option value="infant">Infant (0–18 mo)</option>
+              <option value="toddler">Toddler (1.5–3 yr)</option>
+              <option value="preschool" selected>Pre-school (3–6 yr)</option>
+              <option value="schoolage">School-age (6–9 yr)</option>
+              <option value="preteen">Pre-teen (9–12 yr)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Procedure</label>
+            <select id="procedure" required>
+              <optgroup label="Restorative">
+                <option value="restoration">Composite Restoration (Anterior)</option>
+                <option value="restoration">Composite Restoration (Posterior)</option>
+                <option value="restoration">GIC Restoration (ART)</option>
+                <option value="ssc">Stainless Steel Crown (SSC)</option>
+                <option value="restoration">Strip Crown (Anterior)</option>
+                <option value="ssc">Zirconia Crown</option>
+              </optgroup>
+              <optgroup label="Pulp Therapy">
+                <option value="pulpectomy">Pulp Capping (Direct)</option>
+                <option value="pulpectomy">Pulp Capping (Indirect)</option>
+                <option value="pulpectomy">Pulpotomy</option>
+                <option value="pulpectomy">Pulpectomy (Primary Tooth)</option>
+                <option value="pulpectomy">RCT — Apexogenesis (Young Permanent)</option>
+                <option value="pulpectomy">Apexification</option>
+              </optgroup>
+              <optgroup label="Surgical / Extractions">
+                <option value="extraction">Simple Extraction (Primary Tooth)</option>
+                <option value="extraction">Surgical Extraction</option>
+                <option value="extraction">Frenectomy (Labial / Lingual)</option>
+                <option value="extraction">Operculectomy</option>
+              </optgroup>
+              <optgroup label="Preventive">
+                <option value="fluoride">Pit & Fissure Sealant</option>
+                <option value="fluoride">Fluoride Application (Varnish/Gel)</option>
+                <option value="exam">Prophylaxis / Scaling</option>
+                <option value="exam">OHI Session</option>
+              </optgroup>
+              <optgroup label="Space Management">
+                <option value="spacemaintainer">Space Maintainer — Removable</option>
+                <option value="spacemaintainer">Space Maintainer — Fixed (Band & Loop)</option>
+                <option value="spacemaintainer">Lingual Arch</option>
+                <option value="spacemaintainer">Space Regainer</option>
+              </optgroup>
+              <optgroup label="Habit Appliances">
+                <option value="habit">Thumb/Finger Sucking Appliance</option>
+                <option value="habit">Tongue Thrusting Appliance</option>
+                <option value="habit">Lip Bumper</option>
+                <option value="habit">Myofunctional Appliance</option>
+              </optgroup>
+              <optgroup label="Behaviour / Sedation">
+                <option value="exam">Behaviour Shaping Session (No Procedure)</option>
+                <option value="exam">Conscious Sedation — N₂O</option>
+                <option value="exam">Oral Midazolam Sedation</option>
+                <option value="exam">GA Referral Work-Up</option>
+              </optgroup>
+              <optgroup label="Trauma">
+                <option value="trauma">Crown Fracture Management</option>
+                <option value="trauma">Luxation / Avulsion Management</option>
+                <option value="trauma">Splinting</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <!-- Visit History -->
+        <div class="field">
+          <label>Visit & Treatment History</label>
+          <select id="visitHistory" required>
+            <option value="first">First-ever dental visit</option>
+            <option value="negative">Prior negative/painful experience</option>
+            <option value="neutral" selected>Some visits, neutral attitude</option>
+            <option value="positive">Experienced, cooperative history</option>
+          </select>
+        </div>
+
+        <!-- Behavior -->
+        <div class="field">
+          <label>Observed Behavior Profile (Frankl / Wright)</label>
+          <div class="radio-group" id="behaviorGroup">
+            <label class="radio-card" onclick="selectRadio(this,'behavior','definitely_negative')">
+              <input type="radio" name="behavior" value="definitely_negative">
+              <div class="radio-dot"></div>
+              <div>
+                <div class="radio-label">Definitely Negative (Frankl 1)</div>
+                <div class="radio-sub">Loud crying, physical resistance, refuses to sit, pulls hands away</div>
+              </div>
+            </label>
+            <label class="radio-card selected" onclick="selectRadio(this,'behavior','negative')">
+              <input type="radio" name="behavior" value="negative" checked>
+              <div class="radio-dot"></div>
+              <div>
+                <div class="radio-label">Negative / Anxious (Frankl 2)</div>
+                <div class="radio-sub">Reluctant, tense, clings to parent, silent crying, white-knuckling</div>
+              </div>
+            </label>
+            <label class="radio-card" onclick="selectRadio(this,'behavior','positive')">
+              <input type="radio" name="behavior" value="positive">
+              <div class="radio-dot"></div>
+              <div>
+                <div class="radio-label">Positive (Frankl 3)</div>
+                <div class="radio-sub">Cautious but accepts treatment with some persuasion</div>
+              </div>
+            </label>
+            <label class="radio-card" onclick="selectRadio(this,'behavior','definitely_positive')">
+              <input type="radio" name="behavior" value="definitely_positive">
+              <div class="radio-dot"></div>
+              <div>
+                <div class="radio-label">Definitely Positive (Frankl 4)</div>
+                <div class="radio-sub">Cooperative, interested, may ask questions about instruments</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Parent Profile -->
+        <div class="field">
+          <label>Parent / Guardian Profile (India-specific)</label>
+          <select id="parentProfile" required>
+            <option value="overprotective" selected>Overprotective Mother (won't step back)</option>
+            <option value="anxious_transmitter">Anxious Parent (verbally transmits fear to child)</option>
+            <option value="joint_family">Joint Family (multiple adults present, competing voices)</option>
+            <option value="cooperative">Calm & Cooperative (follows your lead)</option>
+            <option value="detached">Disengaged (on phone, hands-off)</option>
+            <option value="educated_demanding">Educated but Demanding (asks many questions, challenges you)</option>
+          </select>
+        </div>
+
+        <!-- Special Flags -->
+        <div class="field">
+          <label>Special Clinical Flags (multi-select OK)</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);">
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" name="flag" value="gag"> Gag reflex
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" name="flag" value="sickle_cell"> Sickle cell / thalassaemia
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" name="flag" value="asthma"> Asthma
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" name="flag" value="ecc"> Severe ECC (rampant caries)
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" name="flag" value="special_needs"> Special needs / ASD
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" name="flag" value="la_refusal"> Local analgesia refusal
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" name="flag" value="mih"> MIH (Molar Incisor Hypomineralisation)
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" name="flag" value="fluorosis"> Dental Fluorosis
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" name="flag" value="congenital_heart"> Congenital Heart Disease
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" name="flag" value="cleft"> Cleft Lip / Palate
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" id="generateBtn" class="btn btn-primary">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span id="generateBtnText">Generate Clinical Game Plan</span>
+        </button>
+      </form>
+
+      <!-- AI ERROR DISPLAY -->
+      <div id="aiErrorDisplay" style="display:none;margin-top:12px;padding:14px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r-sm);">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <i class="fa-solid fa-circle-exclamation" style="color:var(--red);font-size:16px;margin-top:2px;"></i>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px;">AI Engine Error</div>
+            <div id="aiErrorMessage" style="font-size:12px;color:var(--text);line-height:1.5;"></div>
+          </div>
+          <button onclick="document.getElementById('aiErrorDisplay').style.display='none'" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;min-width:24px;min-height:24px;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLINICAL BEST PRACTICE CARD -->
+    <div class="card card-dark">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#c4a882;margin-bottom:8px;">
+        <i class="fa-solid fa-graduation-cap" style="margin-right:5px;"></i>Evidence-Based Principle — Marwah / DCI
+      </div>
+      <p style="font-size:12px;color:#c8c0b4;line-height:1.7;">
+        Behavior management in Indian children requires accounting for the <strong style="color:#e8d8c4;">Joint Family Dynamic</strong> — grandparents, aunts, and multiple adults often accompany the child. Establish a <em>single-voice protocol</em> before the child enters the chair. Marwah (5th Ed.) identifies the dentist's voice modulation and non-verbal communication as the most critical variables in non-pharmacological management.
+      </p>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #3a342c;font-size:10px;color:#6a6058;line-height:1.8;">
+        <i class="fa-solid fa-book" style="margin-right:5px;"></i>
+        Nikhil Marwah 5th Ed. (Jaypee 2024) &nbsp;·&nbsp; Shobha Tandon 3rd Ed. (Paras 2018) &nbsp;·&nbsp; McDonald &amp; Avery 10th Ed. (Mosby 2022) &nbsp;·&nbsp; Pinkham 5th Ed. &nbsp;·&nbsp; AAPD Clinical Guidelines 2024 &nbsp;·&nbsp; DCI Curriculum 2022 &nbsp;·&nbsp; Andreasen Traumatic Dental Injuries 3rd Ed. &nbsp;·&nbsp; JISPPD Research Base &nbsp;·&nbsp; Nelson's Pediatric Antimicrobial Therapy
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: OUTPUT -->
+  <div id="planSection" style="display:flex;flex-direction:column;gap:14px;">
+
+    <!-- EMPTY STATE -->
+    <div id="emptyState" class="card">
+      <div class="empty-center">
+        <div class="empty-icon"><i class="fa-solid fa-file-medical"></i></div>
+        <div>
+          <div style="font-family:var(--serif);font-size:20px;margin-bottom:6px;">India-Specific Game Plan</div>
+          <div style="font-size:12px;color:var(--text3);max-width:360px;margin:0 auto;">
+            Generate a department-standard clinical game plan — grounded in Marwah, Tandon & DCI curriculum. Calibrated for Indian pediatric dental protocols and patient demographics.
+          </div>
+        </div>
+        <div class="empty-chips">
+          <span class="empty-chip"><i class="fa-solid fa-circle-check" style="color:var(--green);margin-right:4px;"></i>Frankl Scale</span>
+          <span class="empty-chip"><i class="fa-solid fa-circle-check" style="color:var(--green);margin-right:4px;"></i>Indian Parent Profiles</span>
+          <span class="empty-chip"><i class="fa-solid fa-circle-check" style="color:var(--green);margin-right:4px;"></i>Hindi/Regional Scripts</span>
+          <span class="empty-chip"><i class="fa-solid fa-circle-check" style="color:var(--green);margin-right:4px;"></i>Escalation Ladder</span>
+          <span class="empty-chip"><i class="fa-solid fa-circle-check" style="color:var(--green);margin-right:4px;"></i>Drug Dosage Table</span>
+          <span class="empty-chip"><i class="fa-solid fa-circle-check" style="color:var(--green);margin-right:4px;"></i>Failure Trap Alerts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div id="loadingState" class="card" style="display:none;">
+      <div class="empty-center" style="min-height:300px;">
+        <div class="spinner"></div>
+        <div style="text-align:center;">
+          <div style="font-family:var(--serif);font-size:18px;margin-bottom:6px;" id="loadingMsg">Processing clinical intelligence...</div>
+          <div style="font-size:11px;color:var(--text3);">Matching Marwah protocol matrix to patient profile</div>
+        </div>
+        <div style="width:200px;" class="progress-track">
+          <div class="progress-fill" id="progressBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTPUT STATE -->
+    <div id="outputState" style="display:none;flex-direction:column;gap:14px;">
+
+      <!-- UTILITY BAR -->
+      <div class="utility-bar no-print">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--text2);">
+          <span class="status-dot"></span>
+          <span id="planModeLabel">Clinical Matrix Active</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm" onclick="copyParentScript()"><i class="fa-solid fa-copy"></i> Copy Script</button>
+          <button class="btn btn-sm" style="background:var(--accent);color:white;border-color:var(--accent);" onclick="window.print()"><i class="fa-solid fa-print"></i> Print / PDF</button>
+        </div>
+      </div>
+
+      <div class="mobile-panel-hint no-print">
+        <div class="mobile-panel-title">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+          <span id="mobilePanelLabel">Strategy</span>
+        </div>
+        <div class="mobile-panel-count" id="mobilePanelCount">1 / 7</div>
+      </div>
+      <div class="mobile-panel-dots no-print" id="mobilePanelDots" aria-hidden="true">
+        <span class="mobile-dot active"></span>
+        <span class="mobile-dot"></span>
+        <span class="mobile-dot"></span>
+        <span class="mobile-dot"></span>
+        <span class="mobile-dot"></span>
+        <span class="mobile-dot"></span>
+        <span class="mobile-dot"></span>
+      </div>
+
+      <!-- PRINTABLE PLAN -->
+      <div id="printableGamePlan" class="card" style="padding:24px;">
+
+        <!-- HEADER -->
+        <div class="plan-header">
+          <div>
+            <div class="plan-meta">
+              <span style="font-weight:700;color:var(--accent);font-size:10px;letter-spacing:.08em;text-transform:uppercase;">Dept. of Pediatric Dentistry</span>
+              <span style="margin:0 6px;color:var(--border);">|</span>
+              <span>Clinical Game Plan</span>
+              <span style="margin:0 6px;color:var(--border);">|</span>
+              <span id="outDate"></span>
+            </div>
+            <div class="plan-meta" id="outRegClinicianRow" style="margin-top:2px;display:none;">
+              <span id="outRegNo"></span>
+              <span style="margin:0 6px;color:var(--border);" id="outRegSep">|</span>
+              <span id="outClinicianName"></span>
+            </div>
+            <div class="plan-name" id="outPatientName">—</div>
+            <div class="tags-row" id="outTagsRow"></div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- TABS -->
+        <div class="tabs no-print">
+          <div class="tab active" data-tab="tab-strategy" onclick="showTab('tab-strategy', this)">Strategy</div>
+          <div class="tab" data-tab="tab-escalation" onclick="showTab('tab-escalation', this)">Escalation Ladder</div>
+          <div class="tab" data-tab="tab-drugs" onclick="showTab('tab-drugs', this)">Drug Reference</div>
+          <div class="tab" data-tab="tab-parent" onclick="showTab('tab-parent', this)">Parent Script</div>
+          <div class="tab" data-tab="tab-flags" onclick="showTab('tab-flags', this)">Clinical Flags</div>
+          <div class="tab" data-tab="tab-chairscript" onclick="showTab('tab-chairscript', this)"><i class="fa-solid fa-user-nurse" style="margin-right:4px;"></i>Bilingual Parent Kit</div>
+          <div class="tab" data-tab="tab-parentkit" onclick="showTab('tab-parentkit', this); generateParentKit();"><i class="fa-solid fa-people-roof" style="margin-right:4px;"></i>Parent Kit ✨</div>
+        </div>
+
+        <div class="tab-panels-shell">
+
+        <!-- TAB: STRATEGY (default) -->
+        <div class="tab-panel active" id="tab-strategy">
+
+          <!-- TOP ROW: Time + Protocol -->
+          <div class="two-col" style="margin-bottom:14px;">
+            <div class="qref-card">
+              <div class="qref-title"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>Time Budget</div>
+              <div class="qref-body" style="font-size:15px;font-weight:700;color:var(--accent);" id="outDuration">—</div>
+              <div class="qref-body" id="outDurationTip">—</div>
+            </div>
+            <div class="qref-card">
+              <div class="qref-title"><i class="fa-solid fa-shield-halved" style="margin-right:4px;"></i>Primary Protocol</div>
+              <div class="qref-body" id="outProtocolName">—</div>
+            </div>
+          </div>
+
+          <!-- STRATEGY DESCRIPTION -->
+          <div class="strategy-box" style="margin-bottom:14px;">
+            <div class="strategy-tag">Behavior Management Strategy</div>
+            <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px;" id="outStrategyTitle">—</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7;" id="outStrategyDesc">—</div>
+          </div>
+
+          <!-- CULTURAL INSIGHT -->
+          <div class="insight-box" style="margin-bottom:14px;" id="outCulturalInsight">
+            <span class="insight-tag"><i class="fa-solid fa-flag" style="margin-right:4px;"></i>India-Specific Context</span>
+            —
+          </div>
+
+          <!-- TECHNIQUES USED -->
+          <div style="margin-bottom:14px;">
+            <div class="plan-section-h">Techniques (Marwah Classification)</div>
+            <div id="outTechniques">—</div>
+          </div>
+
+          <!-- ASSISTANT CHECKLIST -->
+          <div>
+            <div class="plan-section-h"><i class="fa-solid fa-list-check"></i> Assistant Prep Checklist</div>
+            <ul class="checklist" id="outChecklist"></ul>
+          </div>
+
+        </div>
+
+        <!-- TAB: ESCALATION -->
+        <div class="tab-panel" id="tab-escalation">
+          <div class="info-strip" style="margin-bottom:14px;">
+            <i class="fa-solid fa-arrow-up-right-dots"></i>
+            <span>Use this ladder if baseline strategy fails. Each step escalates intervention. Refer to Marwah Ch. 18 — Pharmacological Behavior Management for Steps 3+.</span>
+          </div>
+          <div class="ladder" id="outEscalationLadder"></div>
+        </div>
+
+        <!-- TAB: DRUGS -->
+        <div class="tab-panel" id="tab-drugs">
+          <!-- WEIGHT CALCULATOR -->
+          <div style="margin-bottom:16px;padding:16px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--r);">
+            <div class="field">
+              <label for="childWeight"><i class="fa-solid fa-weight-scale" style="margin-right:4px;"></i>Child's Weight (kg)</label>
+              <input type="number" id="childWeight" min="3" max="60" step="0.5" placeholder="Enter weight to highlight doses" style="font-size:16px;font-weight:700;">
+            </div>
+          </div>
+
+          <!-- SUMMARY STRIP (hidden by default) -->
+          <div id="dosageSummary" style="display:none;margin-bottom:16px;padding:14px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r);">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+              <div style="flex:1;">
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--green);margin-bottom:6px;">
+                  <i class="fa-solid fa-circle-check" style="margin-right:4px;"></i>Recommended Doses for <span id="summaryWeight"></span>kg
+                </div>
+                <div id="summaryContent" style="font-size:12px;color:var(--text);line-height:1.6;"></div>
+              </div>
+              <button id="btnCopyDoses" class="btn-sm" style="background:var(--green);color:white;border-color:var(--green);white-space:nowrap;">
+                <i class="fa-solid fa-clipboard"></i> Copy All
+              </button>
+            </div>
+          </div>
+
+          <div class="info-strip" style="margin-bottom:14px;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Weight-based dosing. Always confirm with current BNFc or hospital formulary. Pre-medication requires written informed consent and emergency kit availability per DCI guidelines.</span>
+          </div>
+
+          <!-- AI-generated drugs for this case -->
+          <div style="margin-bottom:6px;">
+            <div class="plan-section-h"><i class="fa-solid fa-robot" style="color:var(--accent);"></i> AI-Recommended Drugs for This Case</div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <div class="drug-row" style="font-weight:700;font-size:10px;text-transform:uppercase;color:var(--text3);">
+              <div>Drug</div><div>Dose</div><div>Notes</div>
+            </div>
+            <div id="outDrugTable"></div>
+          </div>
+          <div class="insight-box" id="outDrugNote" style="margin-bottom:18px;">—</div>
+
+          <!-- Static dosage reference tables from Dr. Kher's chart -->
+          <div style="margin-bottom:8px;">
+            <div class="plan-section-h"><i class="fa-solid fa-table" style="color:var(--blue);"></i> Clinic Reference — Exact Dosages by Weight</div>
+            <div id="staticDosageNote" style="font-size:11px;color:var(--text3);margin-bottom:10px;">
+              Enter child's weight in the intake form to highlight the correct row.
+            </div>
+          </div>
+
+          <!-- AMOXICILLIN + CLAVULANIC ACID -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;">Amoxicillin + Clavulanic Acid</div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">Dose: 30–50 mg/kg/day | Syrup Augmentin Duo / Moxclav BD (228.5mg) · Augpen DS / Moxclav DS (457mg)</div>
+            <table style="width:100%;border-collapse:collapse;font-size:11px;" id="tblAmox">
+              <thead><tr style="background:var(--surface2);">
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Weight (kg)</th>
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Dosage</th>
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Frequency</th>
+              </tr></thead>
+              <tbody>
+                <tr data-min="7" data-max="9"><td style="padding:5px 8px;border:1px solid var(--border);">8</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">228.5mg — 4ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="9" data-max="11"><td style="padding:5px 8px;border:1px solid var(--border);">10</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">228.5mg — 5ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="11" data-max="13"><td style="padding:5px 8px;border:1px solid var(--border);">12</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">228.5mg — 6ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="13" data-max="15.5"><td style="padding:5px 8px;border:1px solid var(--border);">15</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">228.5mg — 7.5ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="15.5" data-max="18"><td style="padding:5px 8px;border:1px solid var(--border);">16</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">457mg — 4ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="18" data-max="22"><td style="padding:5px 8px;border:1px solid var(--border);">20</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">457mg — 5ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="22" data-max="26"><td style="padding:5px 8px;border:1px solid var(--border);">24</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">457mg — 6ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="26" data-max="29"><td style="padding:5px 8px;border:1px solid var(--border);">28</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">457mg — 7ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="29" data-max="35"><td style="padding:5px 8px;border:1px solid var(--border);">30</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">457mg — 7.5ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- CEFADROXIL -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;">Cefadroxil</div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">Dose: 30–40 mg/kg/day in 2 divided doses | Availability: 125mg/5ml and 200mg/5ml | Syrup Cefadur Redimix / Zoxil</div>
+            <table style="width:100%;border-collapse:collapse;font-size:11px;" id="tblCefad">
+              <thead><tr style="background:var(--surface2);">
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Weight (kg)</th>
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Dosage 250mg/5ml</th>
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Frequency</th>
+              </tr></thead>
+              <tbody>
+                <tr data-min="6" data-max="8"><td style="padding:5px 8px;border:1px solid var(--border);">6–8</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">2.5 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="8" data-max="13"><td style="padding:5px 8px;border:1px solid var(--border);">10</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">3 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="13" data-max="18"><td style="padding:5px 8px;border:1px solid var(--border);">16</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">5 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="18" data-max="22.5"><td style="padding:5px 8px;border:1px solid var(--border);">20</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">6 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="22.5" data-max="27.5"><td style="padding:5px 8px;border:1px solid var(--border);">25</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">7.5 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+                <tr data-min="27.5" data-max="35"><td style="padding:5px 8px;border:1px solid var(--border);">30</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">9 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">BD</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- METRONIDAZOLE -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;">Metronidazole</div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">Dose: 30 mg/kg/day in 3 divided doses | Availability: 200mg/5ml | Syrup Metrogyl</div>
+            <table style="width:100%;border-collapse:collapse;font-size:11px;" id="tblMetro">
+              <thead><tr style="background:var(--surface2);">
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Weight (kg)</th>
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Dosage</th>
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Frequency</th>
+              </tr></thead>
+              <tbody>
+                <tr data-min="6" data-max="9"><td style="padding:5px 8px;border:1px solid var(--border);">8</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">2 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">TDS</td></tr>
+                <tr data-min="9" data-max="11"><td style="padding:5px 8px;border:1px solid var(--border);">10</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">2.5 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">TDS</td></tr>
+                <tr data-min="11" data-max="14"><td style="padding:5px 8px;border:1px solid var(--border);">12</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">3 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">TDS</td></tr>
+                <tr data-min="14" data-max="18"><td style="padding:5px 8px;border:1px solid var(--border);">16</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">4 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">TDS</td></tr>
+                <tr data-min="18" data-max="22"><td style="padding:5px 8px;border:1px solid var(--border);">20</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">5 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">TDS</td></tr>
+                <tr data-min="22" data-max="26"><td style="padding:5px 8px;border:1px solid var(--border);">24</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">6 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">TDS</td></tr>
+                <tr data-min="26" data-max="35"><td style="padding:5px 8px;border:1px solid var(--border);">28</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">7 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">TDS</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- PARACETAMOL -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;">Paracetamol</div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">Dose: 10–15 mg/kg/dose, repeated up to max 4 hourly | Availability: 125mg/5ml, 250mg/5ml DS | Syrup Crocin / Metacin / Calpol</div>
+            <table style="width:100%;border-collapse:collapse;font-size:11px;" id="tblPara">
+              <thead><tr style="background:var(--surface2);">
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Weight (kg)</th>
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Dosage</th>
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Frequency</th>
+              </tr></thead>
+              <tbody>
+                <tr data-min="6" data-max="9"><td style="padding:5px 8px;border:1px solid var(--border);">8</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">4 ml (125mg/5ml)</td><td style="padding:5px 8px;border:1px solid var(--border);">4–6 hrly PRN</td></tr>
+                <tr data-min="9" data-max="11"><td style="padding:5px 8px;border:1px solid var(--border);">10</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">5 ml (125mg/5ml)</td><td style="padding:5px 8px;border:1px solid var(--border);">4–6 hrly PRN</td></tr>
+                <tr data-min="11" data-max="13.5"><td style="padding:5px 8px;border:1px solid var(--border);">12</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">6 ml (125mg/5ml)</td><td style="padding:5px 8px;border:1px solid var(--border);">4–6 hrly PRN</td></tr>
+                <tr data-min="13.5" data-max="17.5"><td style="padding:5px 8px;border:1px solid var(--border);">15</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">7.5 ml (125mg/5ml)</td><td style="padding:5px 8px;border:1px solid var(--border);">4–6 hrly PRN</td></tr>
+                <tr data-min="17.5" data-max="22"><td style="padding:5px 8px;border:1px solid var(--border);">20</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">5 ml DS (250mg/5ml)</td><td style="padding:5px 8px;border:1px solid var(--border);">4–6 hrly PRN</td></tr>
+                <tr data-min="22" data-max="27"><td style="padding:5px 8px;border:1px solid var(--border);">24</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">6 ml DS (250mg/5ml)</td><td style="padding:5px 8px;border:1px solid var(--border);">4–6 hrly PRN</td></tr>
+                <tr data-min="27" data-max="35"><td style="padding:5px 8px;border:1px solid var(--border);">30</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">7.5 ml DS (250mg/5ml)</td><td style="padding:5px 8px;border:1px solid var(--border);">4–6 hrly PRN</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- IBUPROFEN -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;">Ibuprofen</div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">Dose: 8 mg/kg/dose maximum 6 hourly | Availability: 100mg/5ml | Syrup Ibugesic</div>
+            <table style="width:100%;border-collapse:collapse;font-size:11px;" id="tblIbupro">
+              <thead><tr style="background:var(--surface2);">
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Weight (kg)</th>
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Dosage</th>
+                <th style="text-align:left;padding:5px 8px;border:1px solid var(--border);color:var(--text2);">Frequency</th>
+              </tr></thead>
+              <tbody>
+                <tr data-min="4" data-max="8"><td style="padding:5px 8px;border:1px solid var(--border);">6</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">2.5 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">6 hrly PRN</td></tr>
+                <tr data-min="8" data-max="11"><td style="padding:5px 8px;border:1px solid var(--border);">10</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">4 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">6 hrly PRN</td></tr>
+                <tr data-min="11" data-max="15"><td style="padding:5px 8px;border:1px solid var(--border);">12</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">5 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">6 hrly PRN</td></tr>
+                <tr data-min="15" data-max="21"><td style="padding:5px 8px;border:1px solid var(--border);">18</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">7.5 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">6 hrly PRN</td></tr>
+                <tr data-min="21" data-max="27"><td style="padding:5px 8px;border:1px solid var(--border);">24</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">10 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">6 hrly PRN</td></tr>
+                <tr data-min="27" data-max="35"><td style="padding:5px 8px;border:1px solid var(--border);">30</td><td style="padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);">12 ml</td><td style="padding:5px 8px;border:1px solid var(--border);">6 hrly PRN</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="info-strip" style="margin-top:4px;">
+            <i class="fa-solid fa-book"></i>
+            <span>Reference: Dr. Meenakshi Kher, MDS Pediatric Dentistry, Nair Hospital Dental College, Mumbai — Happy Tooth Clinic Pedo Drug Reference Chart</span>
+          </div>
+        </div>
+
+        <!-- TAB: PARENT SCRIPT -->
+        <div class="tab-panel" id="tab-parent">
+          <div style="margin-bottom:12px;">
+            <div class="plan-section-h">Chairside Parent Direction</div>
+            <div class="script-box">
+              <div class="script-tag">English — Exact Verbal Script</div>
+              <div class="script-text" id="outParentScriptEn">—</div>
+              <div class="script-note" id="outParentScriptNote">—</div>
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div class="plan-section-h">Hindi Script (हिंदी)</div>
+            <div class="script-box" style="background:var(--blue-bg);border-color:var(--blue-border);">
+              <div class="script-tag" style="background:rgba(26,92,181,0.1);color:var(--blue);">Hindi — सटीक संवाद स्क्रिप्ट</div>
+              <div class="script-text" id="outParentScriptHi">—</div>
+            </div>
+          </div>
+          <div>
+            <div class="plan-section-h">Parent Profile-Specific Tactics</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7;" id="outParentTactics">—</div>
+          </div>
+        </div>
+
+        <!-- TAB: FAILURE FLAGS -->
+        <div class="tab-panel" id="tab-flags">
+          <div style="margin-bottom:14px;">
+            <div class="plan-section-h"><i class="fa-solid fa-triangle-exclamation" style="color:var(--red);"></i> Failure Traps — Do NOT Do This</div>
+            <ul class="fail-list" id="outFailureList"></ul>
+          </div>
+          <div>
+            <div class="plan-section-h"><i class="fa-solid fa-flag" style="color:var(--amber);"></i> Special Flag Actions</div>
+            <div id="outFlagActions" style="font-size:12px;color:var(--text2);line-height:1.7;">—</div>
+          </div>
+        </div>
+
+        <!-- TAB: BILINGUAL PARENT KIT -->
+        <div class="tab-panel" id="tab-chairscript">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+            <div class="plan-section-h" style="margin-bottom:0;"><i class="fa-solid fa-user-nurse" style="color:var(--accent);"></i> Bilingual Parent Kit (EN/HI)</div>
+            <div style="display:flex;gap:6px;">
+              <button id="csLangEn" onclick="setChairLang('en')" style="padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:var(--accent);color:white;border-color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;">EN</button>
+              <button id="csLangHi" onclick="setChairLang('hi')" style="padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;">हिंदी</button>
+            </div>
+          </div>
+          <div id="outChairScript" style="font-size:13px;color:var(--text2);">
+            <div style="padding:24px;text-align:center;color:var(--text3);font-size:12px;border:1px dashed var(--border);border-radius:var(--r);">Generate a game plan first to see the bilingual parent kit.</div>
+          </div>
+        </div>
+
+        <!-- TAB: PARENT KIT -->
+        <div class="tab-panel" id="tab-parentkit">
+
+          <!-- Loading state -->
+          <div id="pkLoading" style="display:none;padding:32px 0;text-align:center;">
+            <div class="spinner" style="margin:0 auto 16px;"></div>
+            <div style="font-size:12px;color:var(--text3);" id="pkLoadMsg">Building parent communication kit…</div>
+          </div>
+
+          <!-- Empty state -->
+          <div id="pkEmpty" style="padding:32px 16px;text-align:center;color:var(--text3);font-size:12px;border:1px dashed var(--border);border-radius:var(--r);">
+            <i class="fa-solid fa-people-roof" style="font-size:24px;margin-bottom:10px;display:block;color:var(--accent);opacity:.5;"></i>
+            Generate a game plan first, then open this tab to build the Parent Kit.
+          </div>
+
+          <!-- Kit content -->
+          <div id="pkContent" style="display:none;display:flex;flex-direction:column;gap:18px;">
+
+            <!-- Teaching hospital badge -->
+            <div style="background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;">
+              <i class="fa-solid fa-hospital" style="color:var(--blue);font-size:16px;"></i>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--blue);">Teaching Hospital Communication Kit</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:1px;">5 tools to manage parent anxiety before the child enters the chair</div>
+              </div>
+              <div style="margin-left:auto;display:flex;gap:6px;">
+                <button class="btn btn-sm" onclick="copyParentKit()" style="font-size:10px;"><i class="fa-solid fa-copy"></i> Copy All</button>
+                <button class="btn btn-sm" onclick="window.print()" style="font-size:10px;background:var(--accent);color:white;border-color:var(--accent);"><i class="fa-solid fa-print"></i> Print</button>
+              </div>
+            </div>
+
+            <!-- 1. What to Expect Today -->
+            <div>
+              <div class="plan-section-h" style="color:var(--accent);"><i class="fa-solid fa-circle-info" style="color:var(--accent);"></i> 1 — "What to Expect Today" Handout</div>
+              <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;">
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                  <button onclick="setPKLang('handout','en')" id="pkHandoutEn" style="padding:3px 10px;border-radius:5px;border:1px solid var(--accent);background:var(--accent);color:white;font-size:11px;font-weight:600;cursor:pointer;">EN</button>
+                  <button onclick="setPKLang('handout','hi')" id="pkHandoutHi" style="padding:3px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;">हिंदी</button>
+                </div>
+                <div id="pkHandoutContent" style="font-size:12px;color:var(--text);line-height:1.8;white-space:pre-wrap;"></div>
+              </div>
+            </div>
+
+            <!-- 2. Waiting Room Briefing Script -->
+            <div>
+              <div class="plan-section-h" style="color:var(--green);"><i class="fa-solid fa-person-walking-arrow-right" style="color:var(--green);"></i> 2 — Waiting Room Briefing Script</div>
+              <div class="script-box" style="background:var(--green-bg);border-color:var(--green-border);">
+                <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:6px;">Say this to parent BEFORE child enters</div>
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                  <button onclick="setPKLang('briefing','en')" id="pkBriefingEn" style="padding:3px 10px;border-radius:5px;border:1px solid var(--green);background:var(--green);color:white;font-size:11px;font-weight:600;cursor:pointer;">EN</button>
+                  <button onclick="setPKLang('briefing','hi')" id="pkBriefingHi" style="padding:3px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;">हिंदी</button>
+                </div>
+                <div id="pkBriefingContent" style="font-size:12px;color:var(--text);line-height:1.8;white-space:pre-wrap;font-style:italic;"></div>
+              </div>
+            </div>
+
+            <!-- 3. Objection Handler -->
+            <div>
+              <div class="plan-section-h" style="color:var(--amber);"><i class="fa-solid fa-comments" style="color:var(--amber);"></i> 3 — Parent Objection Responses</div>
+              <div id="pkObjections" style="display:flex;flex-direction:column;gap:8px;"></div>
+            </div>
+
+            <!-- 4. Teaching Hospital Explainer -->
+            <div>
+              <div class="plan-section-h" style="color:var(--blue);"><i class="fa-solid fa-hospital" style="color:var(--blue);"></i> 4 — Teaching Hospital Anxiety De-escalator</div>
+              <div style="background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r-sm);padding:14px;">
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                  <button onclick="setPKLang('hospital','en')" id="pkHospitalEn" style="padding:3px 10px;border-radius:5px;border:1px solid var(--blue);background:var(--blue);color:white;font-size:11px;font-weight:600;cursor:pointer;">EN</button>
+                  <button onclick="setPKLang('hospital','hi')" id="pkHospitalHi" style="padding:3px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;">हिंदी</button>
+                </div>
+                <div id="pkHospitalContent" style="font-size:12px;color:var(--text);line-height:1.8;white-space:pre-wrap;"></div>
+              </div>
+            </div>
+
+            <!-- 5. Post-Procedure WhatsApp Message -->
+            <div>
+              <div class="plan-section-h" style="color:var(--green);"><i class="fa-brands fa-whatsapp" style="color:var(--green);"></i> 5 — Post-Procedure WhatsApp Message</div>
+              <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r-sm);padding:14px;">
+                <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:8px;">Copy & send after the appointment</div>
+                <div id="pkWhatsapp" style="font-size:12px;color:var(--text);line-height:1.8;white-space:pre-wrap;background:white;border-radius:8px;padding:12px;border:1px solid var(--green-border);"></div>
+                <button onclick="copyWhatsapp()" class="btn btn-sm" style="margin-top:10px;background:var(--green);color:white;border-color:var(--green);"><i class="fa-brands fa-whatsapp"></i> Copy WhatsApp Message</button>
+              </div>
+            </div>
+
+            <!-- 6. Intern Briefing Card -->
+            <div>
+              <div class="plan-section-h"><i class="fa-solid fa-user-graduate"></i> 6 — Intern Briefing Card</div>
+              <div style="background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--r-sm);padding:14px;">
+                <div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;">Hand this to your intern before they enter</div>
+                <div id="pkIntern" style="font-size:12px;color:var(--text);line-height:1.8;white-space:pre-wrap;"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        </div>
+
+        <!-- FOOTER (always visible in print) -->
+        <div style="margin-top:20px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:10px;color:var(--text3);">
+          <span>Protocol: Marwah 5th Ed. (Jaypee) • Shobha Tandon 3rd Ed. (Paras) • DCI Curriculum 2022</span>
+          <span>KIDDOKANINE</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="mobile-dock no-print" aria-label="Mobile quick actions">
+  <button type="button" onclick="scrollToSection('intakeSection')"><i class="fa-solid fa-user-pen"></i><span>Intake</span></button>
+  <button type="button" class="primary" onclick="scrollToSection('planSection')"><i class="fa-solid fa-sparkles"></i><span>Plan</span></button>
+  <button type="button" onclick="openModal('refModal')"><i class="fa-solid fa-book"></i><span>Ref</span></button>
+  <button type="button" onclick="openModal('settingsModal')"><i class="fa-solid fa-gear"></i><span>AI</span></button>
+</div>
+
+<!-- MODAL: QUICK REFERENCE -->
+<div class="modal-bg" id="refModal">
+  <div class="modal" style="max-width:680px;">
+    <button class="modal-close" onclick="closeModal('refModal')"><i class="fa-solid fa-xmark"></i></button>
+    <div style="font-family:var(--serif);font-size:20px;margin-bottom:4px;">Quick Clinical Reference</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:16px;">Based on Marwah 5th Ed., Shobha Tandon 3rd Ed. & DCI 2022</div>
+
+    <div class="tabs" style="flex-wrap:wrap;">
+      <div class="tab active" onclick="showRefTab('rtab-frankl', this)">Frankl Scale</div>
+      <div class="tab" onclick="showRefTab('rtab-bmp', this)">BMP Techniques</div>
+      <div class="tab" onclick="showRefTab('rtab-la', this)">LA Guide</div>
+      <div class="tab" onclick="showRefTab('rtab-ecc', this)">ECC India</div>
+      <div class="tab" onclick="showRefTab('rtab-pulp', this)">Pulp Therapy</div>
+      <div class="tab" onclick="showRefTab('rtab-mih', this)">MIH</div>
+      <div class="tab" onclick="showRefTab('rtab-drugs', this)">Drug Doses</div>
+      <div class="tab" onclick="showRefTab('rtab-fluoride', this)">Fluoride</div>
+    </div>
+
+    <div class="tab-panel active" id="rtab-frankl">
+      <div class="qref-grid">
+        <div class="qref-card" style="border-color:var(--red-border);">
+          <div class="qref-title" style="color:var(--red);">Frankl 1 — Definitely Negative</div>
+          <div class="qref-body">Refuses treatment. Cries forcefully. Extremely negative. Unmanageable with standard NP techniques alone.</div>
+        </div>
+        <div class="qref-card" style="border-color:var(--amber-border);">
+          <div class="qref-title" style="color:var(--amber);">Frankl 2 — Negative</div>
+          <div class="qref-body">Reluctant to accept treatment. Some evidence of negative attitude. Not cooperative, sulky, withdrawn.</div>
+        </div>
+        <div class="qref-card" style="border-color:var(--green-border);">
+          <div class="qref-title" style="color:var(--green);">Frankl 3 — Positive</div>
+          <div class="qref-body">Accepts treatment. Cautious, willing to comply with dentist, follows directions with occasional reserve.</div>
+        </div>
+        <div class="qref-card" style="border-color:var(--blue-border);">
+          <div class="qref-title" style="color:var(--blue);">Frankl 4 — Definitely Positive</div>
+          <div class="qref-body">Good rapport. Interested in dental procedures, laughs, enjoys situation. Cooperates fully.</div>
+        </div>
+      </div>
+      <div class="info-strip" style="margin-top:12px;">
+        <i class="fa-solid fa-info-circle"></i>
+        <span>Wright's classification (1975): cooperative, lacking cooperative ability, potentially cooperative. Frankl (1962) is the most cited in Indian dental colleges (Marwah Ch.12).</span>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="rtab-bmp">
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;">
+        <strong>Non-Pharmacological (NP) — First line per Marwah:</strong><br>
+        <span class="tech-tag">Tell-Show-Do (TSD)</span>
+        <span class="tech-tag">Voice Control</span>
+        <span class="tech-tag">Positive Reinforcement</span>
+        <span class="tech-tag">Distraction</span>
+        <span class="tech-tag">Desensitisation</span>
+        <span class="tech-tag">Modelling</span>
+        <span class="tech-tag">HOME</span>
+        <span class="tech-tag">Restraint (Papoose)</span>
+        <br><br>
+        <strong>Pharmacological — Escalation per DCI:</strong><br>
+        <span class="tech-tag" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);">N₂O-O₂ Anxiolysis</span>
+        <span class="tech-tag" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);">Oral Midazolam</span>
+        <span class="tech-tag" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);">Oral Triclofos</span>
+        <span class="tech-tag" style="background:var(--red-bg);color:var(--red);border-color:var(--red-border);">GA (Last resort)</span>
+        <br><br>
+        <strong>HOME (Hand Over Mouth Exercise):</strong> No longer recommended as primary technique per 2022 AAPD guidelines. Use only as absolute last resort NP, with full parental informed consent, and never in medically compromised children. Shobha Tandon includes it with heavy caveats.
+      </div>
+    </div>
+
+    <div class="tab-panel" id="rtab-la">
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:12px;">
+        <strong>Topical Anaesthesia (mandatory before any injection — Marwah):</strong><br>
+        Apply 2% Lignocaine gel to dry mucosa for 60–90 seconds. Do not mention "injection" — use "magic sleep drops" or "sleepy medicine."
+      </div>
+      <div class="drug-row" style="font-weight:700;font-size:10px;text-transform:uppercase;color:var(--text3);">
+        <div>Agent</div><div>Dose / Conc.</div><div>Max Dose (Child)</div>
+      </div>
+      <div class="drug-row">
+        <div class="drug-name">Lignocaine 2% + Adrenaline 1:80,000</div>
+        <div class="drug-dose">4.4 mg/kg</div>
+        <div class="drug-note">Max 300 mg. Standard LA for most procedures.</div>
+      </div>
+      <div class="drug-row">
+        <div class="drug-name">Lignocaine 2% plain (no adrenaline)</div>
+        <div class="drug-dose">4.4 mg/kg</div>
+        <div class="drug-note">Use for patients with cardiac conditions or hyperthyroidism.</div>
+      </div>
+      <div class="drug-row">
+        <div class="drug-name">Mepivacaine 3%</div>
+        <div class="drug-dose">4.4 mg/kg</div>
+        <div class="drug-note">Faster onset, shorter duration. Useful for very short procedures.</div>
+      </div>
+      <div class="drug-row">
+        <div class="drug-name">Benzocaine Topical 20%</div>
+        <div class="drug-dose">Apply 1–2 min</div>
+        <div class="drug-note">Pre-injection topical only. Do not inject.</div>
+      </div>
+      <div class="info-strip" style="margin-top:10px;">
+        <i class="fa-solid fa-syringe"></i>
+        <span>Technique tip: Always aspirate before injecting. Slow deposition (1 mL/min). Keep syringe out of child's line of sight. Assistant verbal distraction during injection is mandatory.</span>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="rtab-ecc">
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;">
+        <strong>Early Childhood Caries (ECC) — Indian Context (Marwah Ch. 20):</strong><br><br>
+        India has one of the highest ECC prevalence rates globally — studies from AIIMS, KGMCand Manipal show <strong>prevalence between 44–65%</strong> in pre-school age groups.<br><br>
+        <strong>Primary drivers in Indian setting:</strong><br>
+        • Prolonged on-demand breastfeeding (bottle or direct) beyond 18 months<br>
+        • Sugar-sweetened beverages (packaged juices, cola) from infancy<br>
+        • Sharing spoons / kissing — MS transmission from mother<br>
+        • Night-time feeding without oral hygiene<br><br>
+        <strong>Marwah Classification of ECC severity:</strong><br>
+        <span class="tech-tag">Type I (mild)</span> — posterior only, diet related<br>
+        <span class="tech-tag" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);">Type II (moderate)</span> — anterior + posterior<br>
+        <span class="tech-tag" style="background:var(--red-bg);color:var(--red);border-color:var(--red-border);">Type III (severe)</span> — all surfaces, including lower incisors<br><br>
+        <strong>SDF (Silver Diamine Fluoride):</strong> 38% SDF is now endorsed in Marwah 5th Ed. as a viable interim or definitive treatment for uncooperative young children in Indian settings. Arrest rate: 81% in primary teeth. Cost-effective for lower-resource settings.
+      </div>
+    </div>
+
+    <!-- PULP THERAPY TAB -->
+    <div class="tab-panel" id="rtab-pulp">
+      <div style="font-size:12px;color:var(--text2);line-height:1.8;">
+        <strong>Pulp Therapy Decision Tree (Marwah 5th Ed. Ch.15 + AAPD Pulp Therapy Guidelines 2024):</strong><br><br>
+        <strong style="color:var(--green);">Vital Pulp Therapy:</strong><br>
+        <span class="tech-tag" style="background:var(--green-bg);color:var(--green);border-color:var(--green-border);">Indirect Pulp Treatment (IPT)</span> — 1 or 2-step. Selective caries removal, Ca(OH)₂ or MTA base. Primary and permanent teeth. AAPD 2024: 1-step IPT preferred.<br>
+        <span class="tech-tag" style="background:var(--green-bg);color:var(--green);border-color:var(--green-border);">Pulpotomy (primary)</span> — coronal pulp removed. MTA or biodentine preferred agent. Formocresol still acceptable (Marwah). Success rate 94% (MTA).<br>
+        <span class="tech-tag" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);">Apexogenesis</span> — immature permanent teeth with vital pulp. Preserve Hertwig's sheath. MTA/Biodentine pulpotomy or partial pulpotomy.<br><br>
+        <strong style="color:var(--red);">Non-Vital / Necrotic:</strong><br>
+        <span class="tech-tag" style="background:var(--red-bg);color:var(--red);border-color:var(--red-border);">Pulpectomy (primary)</span> — complete pulp removal. Obturate with KRI paste (preferred, Marwah 5th) or ZOE. 2-visit protocol for infected cases.<br>
+        <span class="tech-tag" style="background:var(--red-bg);color:var(--red);border-color:var(--red-border);">Apexification</span> — immature permanent with necrotic pulp. Ca(OH)₂ x 6-18 mo OR MTA apical plug (1-visit). Monitor radiographically.<br>
+        <span class="tech-tag" style="background:var(--red-bg);color:var(--red);border-color:var(--red-border);">Revascularisation / Regenerative Endodontics</span> — immature permanent, open apex, necrotic pulp. AAPD 2024 endorsed. Blood clot scaffold + MTA/Biodentine coronal plug. Long-term root development possible.<br><br>
+        <div class="info-strip">
+          <i class="fa-solid fa-info-circle"></i>
+          <span>Contraindications to vital pulp therapy (Marwah): spontaneous/nocturnal pain, pathologic root resorption (>1/3), periapical rarefaction, furcation involvement, mobility Grade III. If any present → pulpectomy or extraction.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIH TAB -->
+    <div class="tab-panel" id="rtab-mih">
+      <div style="font-size:12px;color:var(--text2);line-height:1.8;">
+        <strong>MIH — Molar Incisor Hypomineralisation (EAPD Definition + Marwah 5th Ed. Ch.21 + AAPD 2024):</strong><br><br>
+        Qualitative enamel defect affecting ≥1 first permanent molar (FPM), often with incisor involvement. Prevalence in India: 9–12% (JISPPD studies). Cause: systemic insult during enamel mineralisation (late pregnancy–age 3).<br><br>
+        <strong>EAPD Severity Index (per tooth):</strong><br>
+        <span class="tech-tag" style="background:var(--green-bg);color:var(--green);border-color:var(--green-border);">Score 0</span> No demarcated opacity<br>
+        <span class="tech-tag" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);">Score 1</span> Demarcated opacity (white/yellow/brown) — intact surface<br>
+        <span class="tech-tag" style="background:var(--red-bg);color:var(--red);border-color:var(--red-border);">Score 2</span> Post-eruptive enamel breakdown<br>
+        <span class="tech-tag" style="background:var(--red-bg);color:var(--red);border-color:var(--red-border);">Score 3</span> Atypical restoration / extraction history<br><br>
+        <strong>Management by severity:</strong><br>
+        Score 1 → Fluoride varnish + GIC sealant + monitor<br>
+        Score 2 (small) → Resin infiltration (Icon) or composite bonding<br>
+        Score 2 (large) → SSC for FPMs, composite for incisors<br>
+        Score 3 → SSC or extraction (if poor prognosis) + orthodontic assessment<br><br>
+        <strong>LA note:</strong> MIH FPMs are hypersensitive — standard block may be inadequate. Use articaine 4% or intraligamentary supplemental injection. Warn patient before any air/water on affected tooth.
+      </div>
+    </div>
+
+    <!-- DRUG DOSES TAB -->
+    <div class="tab-panel" id="rtab-drugs">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">Based on Nelson's Pediatric Antimicrobial Therapy + Marwah 5th Ed. + AAPD 2024. Verify before prescribing. Weight-based calculator available in intake form.</div>
+      <div class="drug-row" style="font-weight:700;font-size:10px;text-transform:uppercase;color:var(--text3);">
+        <div>Drug</div><div>Dose</div><div>Notes</div>
+      </div>
+      <div class="drug-row"><div class="drug-name">Amoxicillin</div><div class="drug-dose">40 mg/kg/day ÷ 3</div><div class="drug-note">First-line dental infection. 5 days. Max 500 mg/dose.</div></div>
+      <div class="drug-row"><div class="drug-name">Amoxicillin-Clavulanate</div><div class="drug-dose">45 mg/kg/day ÷ 2</div><div class="drug-note">For resistant / mixed flora. Space maintainer infections.</div></div>
+      <div class="drug-row"><div class="drug-name">Metronidazole</div><div class="drug-dose">7.5 mg/kg TDS</div><div class="drug-note">Add for anaerobic component (foul smell, Ludwig's angina). 5 days.</div></div>
+      <div class="drug-row"><div class="drug-name">Azithromycin</div><div class="drug-dose">10 mg/kg OD</div><div class="drug-note">Penicillin allergy. 3-day course. Short half-life = good compliance.</div></div>
+      <div class="drug-row"><div class="drug-name">Ibuprofen</div><div class="drug-dose">5–10 mg/kg 6-hrly</div><div class="drug-note">Preferred post-op analgesic. Max 40 mg/kg/day. Avoid if asthma/NSAID allergy.</div></div>
+      <div class="drug-row"><div class="drug-name">Paracetamol</div><div class="drug-dose">10–15 mg/kg 6-hrly</div><div class="drug-note">When NSAID contraindicated. Max 60 mg/kg/day.</div></div>
+      <div class="drug-row"><div class="drug-name">Oral Midazolam (sedation)</div><div class="drug-dose">0.5 mg/kg (max 15 mg)</div><div class="drug-note">30 min pre-procedure. SpO₂ monitoring mandatory. DCI 2022: trained staff + resuscitation equipment required.</div></div>
+      <div class="drug-row"><div class="drug-name">Oral Triclofos</div><div class="drug-dose">70–75 mg/kg (max 1g)</div><div class="drug-note">Mild sedation. Toddlers/preschool. Less predictable than midazolam.</div></div>
+      <div class="drug-row"><div class="drug-name">N₂O-O₂ anxiolysis</div><div class="drug-dose">30–50% N₂O titration</div><div class="drug-note">First pharmacological choice. Administer 100% O₂ for 5 min at end. Marwah Ch.14.</div></div>
+      <div class="drug-row"><div class="drug-name">Amoxicillin (IE prophylaxis)</div><div class="drug-dose">50 mg/kg 30–60 min before (max 2g)</div><div class="drug-note">AHA protocol for high-risk congenital heart disease. If penicillin allergy: Clindamycin 20 mg/kg (max 600 mg).</div></div>
+      <div class="info-strip" style="margin-top:10px;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Fluoride toxicity: safe dose 5 mg/kg. Certainly lethal: 32–64 mg/kg. Fluoride varnish 0.25 mL (Duraphat) = ~2.5 mg F — safe even if swallowed. Always reassure parent.</span>
+      </div>
+    </div>
+
+    <!-- FLUORIDE TAB -->
+    <div class="tab-panel" id="rtab-fluoride">
+      <div style="font-size:12px;color:var(--text2);line-height:1.8;">
+        <strong>Fluoride Protocol — AAPD 2024 / Marwah 5th Ed. Ch.7 / WHO / Indian Context:</strong><br><br>
+        <strong>Water Fluoride — India:</strong> WHO optimal level 0.7–1.0 ppm. Most Indian municipal water: 0.1–0.3 ppm (deficient). Rajasthan, AP, Telangana, Gujarat: endemic fluorosis zones (2–10+ ppm).<br><br>
+        <strong>Fluoride Supplements (where water &lt;0.3 ppm — AAPD):</strong><br>
+        Age 6 mo–3 yr: 0.25 mg/day · Age 3–6 yr: 0.50 mg/day · Age 6–16 yr: 1.0 mg/day<br><br>
+        <strong>Toothpaste:</strong><br>
+        <span class="tech-tag">Age 0–2</span>: smear (rice grain) 1000 ppm — if high caries risk<br>
+        <span class="tech-tag">Age 2–6</span>: pea-sized (500–1000 ppm) — do not rinse after brushing<br>
+        <span class="tech-tag">Age 6+</span>: pea-sized 1000–1450 ppm — standard adult toothpaste<br><br>
+        <strong>Fluoride Varnish (5% NaF = 22,600 ppm):</strong> AAPD 2024: apply every 3–6 months for moderate-high risk. Method: dry tooth, apply thin layer with brush/applicator, instruct no eating/drinking 30 min. Safe even if swallowed (0.25 mL = ~2.5 mg F).<br><br>
+        <strong>SDF 38% (44,800 ppm F + 254,000 ppm Ag):</strong> Apply annually. Arrest rate 81% primary teeth. Staining mandatory counselling.<br><br>
+        <strong>Pit &amp; Fissure Sealants:</strong> AAPD 2024: resin-based sealants preferred. RMGIC sealants acceptable. Apply to all erupted permanent molars in moderate-high risk children. Marwah: RMGIC sealants have additional F-release benefit for high-risk Indian children.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: AI ENGINE -->
+<div class="modal-bg" id="settingsModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('settingsModal')"><i class="fa-solid fa-xmark"></i></button>
+    <div style="font-family:var(--serif);font-size:18px;margin-bottom:4px;">AI Engine Config</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:16px;">The core clinical matrix is fully offline — no key needed. AI engine adds supplementary reasoning on top of the matrix. All core game plans, drug dosages, scripts, and escalation ladders work without AI.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="field">
+        <label>Engine Mode</label>
+        <select id="apiProvider" onchange="toggleApiInput()">
+          <option value="offline">Offline Clinical Matrix (Instant — No Key)</option>
+          <option value="google">Google Gemini Flash (Free tier — generous)</option>
+          <option value="qwen">Alibaba Qwen Turbo (1M free tokens/mo via DashScope)</option>
+          <option value="anthropic">Claude AI — Anthropic (Paid key)</option>
+        </select>
+        <div id="providerHint" style="margin-top:5px;"></div>
+      </div>
+      <div id="apiKeyWrapper" style="display:none;" class="field">
+        <label id="apiKeyLabel">API Key</label>
+        <input type="password" id="apiKey" placeholder="Paste your key here..." />
+        <div id="apiKeyHint" style="font-size:10px;color:var(--text3);margin-top:3px;">Stored locally in your browser only. Never sent to any server except the selected AI endpoint.</div>
+      </div>
+      <button class="btn btn-primary" onclick="saveApiSettings()"><i class="fa-solid fa-floppy-disk"></i> Save Preferences</button>
+      <button class="btn btn-outline" onclick="KiddokanineLicense.reset()" style="margin-top: 15px; width: 100%; border-color: #b5401a; color: #b5401a;">Remove License Key</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast">
+  <i class="fa-solid fa-circle-check" style="color:#7ec89a;"></i>
+  <span id="toastMsg">Done.</span>
+</div>
+
+<script src="js/clinical-engine.js"></script>
+
+<!-- FOOTER -->
+<div style="text-align:center;padding:18px 20px 32px;border-top:1px solid var(--border);margin-top:8px;background:var(--surface);font-size:10px;color:var(--text3);">
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:5px;">
+    <svg width="32" height="32" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="25" y="25" width="150" height="150" rx="40" fill="#003087"/>
+      <path d="M100 50 Q110 55 115 70 Q118 85 118 100 Q118 120 105 135 Q98 142 90 145 Q80 140 72 132 Q60 115 60 95 Q60 78 70 68 Q78 62 88 58 Q94 56 100 50 Z" fill="white" stroke="white" stroke-width="4"/>
+      <path d="M80 85 Q90 80 100 85 Q110 90 108 88 Q100 95 90 93 Q82 91 80 85 Z" fill="#003087" opacity="0.3"/>
+    </svg>
+    <span style="font-weight:700;color:var(--text2);font-size:11px;">KIDDOKANINE</span>
+  </div>
+  <div>[Clinic Name Placeholder]</div>
+  <div>[Clinic Address]</div>
+  <div style="margin-top:3px;">KIDDOKANINE Clinical Tool · For departmental use only · Not for commercial distribution</div>
+  <div style="margin-top:3px;">Grounded in: Nikhil Marwah 5th Ed. (2024) · Shobha Tandon 3rd Ed. · DCI Curriculum 2022</div>
+</div>
+
+<!-- Export & Sharing Module -->
+<script src="js/export.js"></script>
+
+<!-- ================================================================
+     PEDOPLAN SECURITY & BRANDING MODULE
+     Author  : (see APP_CONFIG.authorName)
+     Version : (see APP_CONFIG.version)
+     Sections:
+       F1 – Invite-Only Beta Access (Auth Gate)
+       F2 – Persistent Branding
+       F3 – About / Terms Tab
+       F4 – Anti-Casual-Copy Protection
+       F5 – PDF / Export Watermarking
+       F6 – Usage Analytics + Admin Panel
+     Architecture: browser-side localStorage now;
+       swap authorizedUsers / inviteCodes stores for
+       Supabase / Firebase / Clerk with minimal changes.
+================================================================ -->
+<script src="js/security.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "KIDDOKANINE — Pediatric Dental Game Plan",
+  "short_name": "KIDDOKANINE",
+  "description": "India-specific pediatric dental behavior management and clinical planning tool",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#b5401a",
+  "background_color": "#f5f2ec",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
