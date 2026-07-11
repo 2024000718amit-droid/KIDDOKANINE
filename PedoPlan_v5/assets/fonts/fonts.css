@@ -1,0 +1,82 @@
+/* Local Google Fonts for PedoPlan - Offline Bundle */
+
+/* DM Sans - 300 (Light) */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('./dm-sans/dm-sans-latin-300-normal.woff2') format('woff2');
+}
+
+/* DM Sans - 400 (Regular) */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./dm-sans/dm-sans-latin-400-normal.woff2') format('woff2');
+}
+
+/* DM Sans - 500 (Medium) */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./dm-sans/dm-sans-latin-500-normal.woff2') format('woff2');
+}
+
+/* DM Sans - 600 (SemiBold) */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./dm-sans/dm-sans-latin-600-normal.woff2') format('woff2');
+}
+
+/* DM Sans - 700 (Bold) */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./dm-sans/dm-sans-latin-700-normal.woff2') format('woff2');
+}
+
+/* DM Serif Display - Regular */
+@font-face {
+  font-family: 'DM Serif Display';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./dm-serif-display/dm-serif-display-latin-400-normal.woff2') format('woff2');
+}
+
+/* DM Serif Display - Italic */
+@font-face {
+  font-family: 'DM Serif Display';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./dm-serif-display/dm-serif-display-latin-400-italic.woff2') format('woff2');
+}
+
+/* JetBrains Mono - 400 (Regular) */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./jetbrains-mono/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+}
+
+/* JetBrains Mono - 600 (SemiBold) */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./jetbrains-mono/jetbrains-mono-latin-600-normal.woff2') format('woff2');
+}
