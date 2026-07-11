@@ -1,8 +1,0 @@
-{
-  "name": "pedoplan-desktop",
-  "version": "1.0.0",
-  "description": "Pediatric Dental Clinical Assistant - Desktop Application",
-  "main": "main.js",
-  "author": "PedoPlan",
-  "license": "MIT"
-}
